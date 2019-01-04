@@ -96,7 +96,9 @@ function connect()
     try {
         $connection->connect();
     } catch (\Exception $e) {
-        throw new Exception('Could not connect to Exact: ' . $e->getMessage());
+        trigger_error('Could not connect to Exact: ' . $e->getMessage());
+        setValue('authorizationcode', null);
+        return false;
     }
 
     return $connection;
@@ -114,14 +116,16 @@ if (getValue('authorizationcode') === null) {
 
 // Create the Exact client
 $connection = connect();
+if ($connection !== false) {
 
-// Get the journals from our administration
-try {
-    $journals = new \Picqer\Financials\Exact\Journal($connection);
-    $result   = $journals->get();
-    foreach ($result as $journal) {
-        echo 'Journal: ' . $journal->Description . '<br>';
+    // Get the journals from our administration
+    try {
+        $journals = new \Picqer\Financials\Exact\Journal($connection);
+        $result   = $journals->get();
+        foreach ($result as $journal) {
+            echo 'Journal: ' . $journal->Description . '<br>';
+        }
+    } catch (\Exception $e) {
+        echo get_class($e) . ' : ' . $e->getMessage();
     }
-} catch (\Exception $e) {
-    echo get_class($e) . ' : ' . $e->getMessage();
 }
